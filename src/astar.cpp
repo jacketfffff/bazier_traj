@@ -5,6 +5,7 @@ namespace planner{
 
     AStar::AStar(){
 
+
     }
 
     AStar::~AStar(){
