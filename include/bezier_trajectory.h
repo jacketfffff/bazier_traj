@@ -8,7 +8,7 @@
 #include "bazier_traj/planner_parameter.h"
 #include "mosek.h"
 #include "region_segmentation.h"
-
+//bezier trajectory generator
 namespace planner{
 
     class Bernstein{
