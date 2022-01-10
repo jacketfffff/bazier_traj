@@ -57,8 +57,6 @@ namespace planner{
                 const int _traj_order,
                 const double _minimize_order,
                 const double _margin,
-                const bool _isLimitVel,
-                const bool _isLimitAcc,
                 double &_obj,
                 Eigen::MatrixXd &_PolyCoeff);
     };

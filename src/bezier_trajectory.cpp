@@ -242,12 +242,8 @@ namespace planner{
         const int _traj_order,
         const double _minimize_order,
         const double _margin,
-        const bool _isLimitVel,
-        const bool _isLimitAcc,
         double &_obj,
         Eigen::MatrixXd &_PolyCoeff){
-#define ENFORCE_VEL _isLimitVel;
-#define ENFORCE_ACC _isLimitAcc;
 
         double initScale = _region.front()->t_;
         double lstScale = _region.back()->t_;
