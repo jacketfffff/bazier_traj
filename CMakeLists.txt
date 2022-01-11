@@ -89,7 +89,6 @@ target_link_libraries(region_segmentation ${catkin_LIBRARIES} planner_parameter)
 add_library(bezier_trajectory src/bezier_trajectory.cpp)
 target_link_libraries(bezier_trajectory ${catkin_LIBRARIES} planner_parameter mosek64)
 
-
 add_executable(random_obs_generation_node src/random_obs_generation_node.cpp)
 target_link_libraries(random_obs_generation_node ${catkin_LIBRARIES} random_obs_generation ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -97,7 +96,7 @@ add_executable(odom_generation src/odom_generation.cpp)
 target_link_libraries(odom_generation ${catkin_LIBRARIES})
 
 add_executable(bezier_traj_node src/bazier_traj_node.cpp)
-target_link_libraries(bezier_traj_node collision_map planner_parameter ${catkin_LIBRARIES} ${PCL_LIBRARIES} sdf_tools a_star region_segmentation mosek64)
+target_link_libraries(bezier_traj_node collision_map planner_parameter ${catkin_LIBRARIES} ${PCL_LIBRARIES} sdf_tools a_star region_segmentation mosek64 bezier_trajectory)
 
 # add_executable(grid_search src/astar.cpp)
 # target_link_libraries(grid_search ${catkin_LIBRARIES} sdf_tools)

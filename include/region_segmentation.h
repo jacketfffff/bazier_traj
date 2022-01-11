@@ -57,6 +57,7 @@ namespace planner{
             ~RegionSegmentation();
             void init();
 
+            std::vector<cubePtr> getSegRes() {return region_res_;}
             void advertiseInit(ros::NodeHandle &_nh){
                 segmentation_res_vis_ = _nh.advertise<visualization_msgs::MarkerArray>("segmentation_res", 10);
             }

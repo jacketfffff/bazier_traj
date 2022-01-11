@@ -26,7 +26,7 @@ namespace planner{
     }
 
     int Bernstein::setParam(int _poly_order_min, int _poly_order_max, double _min_order){
-        int ret = (_poly_order_min >= 3 && _poly_order_max <= 13) ? 1 : -1;
+        int ret = (_poly_order_min >= 3 && _poly_order_max <= 10) ? 1 : -1;
 
         order_min_ = _poly_order_min;
         order_max_ = _poly_order_max;
