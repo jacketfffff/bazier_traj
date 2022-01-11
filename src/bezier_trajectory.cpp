@@ -253,24 +253,23 @@ namespace planner{
         int s1d1CtrlPt_num = n_ploy;
         // int s1CtrlPt_num = 3 * s1d1CtrlPt_num;
         int s1CtrlPt_num = 2 * s1d1CtrlPt_num;
-        //等式约束： 包括位置约束和连续性约束， jerk作为目标函数，pva都有约束项，轨迹维度是二维
-        // int equ_con_s_num = 3 * 3;
+        //起点和终点约束：jerk作为优化目标，pva都有约束项，轨迹维度是二维
         int equ_con_s_num = 2 * 3;
-        // int equ_con_e_num = 3 * 3;
         int equ_con_e_num = 2 * 3;
-        // int equ_con_continuity_num = 3 * 3 * (segment_num - 1);
+        //连续性约束，轨迹段数-1 * 3（pva） * 2(xy)
         int equ_con_continuity_num = 2 * 3 * (segment_num - 1);
         int equ_con_num = equ_con_s_num + equ_con_e_num + equ_con_continuity_num;
-        //速度和加速度的约束是不等式约束，主要限制最大速度的范围
-        // int vel_con_num = 3 * _traj_order * segment_num;
+        //tag: 速度和加速度的约束是不等式约束，主要限制最大速度的范围 加速度和速度对每段轨迹只有一个约束，乘traj_order变为系数项个数
         int vel_con_num = 2 * _traj_order * segment_num;
         int acc_con_num = 2 * (_traj_order - 1) * segment_num;
 
         int high_order_con_num = vel_con_num + acc_con_num;
-
+        //总约束项 con_num， 贝塞尔控制点总数量 ctrlPt_num
         int con_num = equ_con_num + high_order_con_num;
         int ctrlPt_num = segment_num * s1CtrlPt_num;
         /************以上，整体搭建了优化问题各类约束的数量信息***********/
+
+
         double x_var[ctrlPt_num];
         double primalobj;
 
@@ -304,7 +303,7 @@ namespace planner{
             std::pair<MSKboundkeye, std::pair<double, double>> cb_eq = std::make_pair(MSK_BK_FX, std::make_pair(beq_i, beq_i));
             con_bdk.push_back(cb_eq);
         }
-
+        // 以上 约束项， 以下 变量
         std::vector<std::pair<MSKboundkeye, std::pair<double, double>>> var_bdk;
         for (int k = 0; k < segment_num; k++){
             cubePtr cube_ = _region[k];
@@ -327,7 +326,7 @@ namespace planner{
                 }
             }
         }
-
+        //以上 变量完成
         MSKint32t j, i;
         MSKenv_t env;
         MSKtask_t task;
@@ -448,7 +447,7 @@ namespace planner{
             r = MSK_putarow(task, row_idx, nzi, asub, aval);
             row_idx ++;
         }
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 2; i++)
         {
             int nzi = 3;
             MSKint32t asub[nzi];
@@ -472,7 +471,7 @@ namespace planner{
 
             val0 = scale_k;
             val1 = scale_n;
-            for (int i = 0; i < 3; i++){
+            for (int i = 0; i < 2; i++){
                 int nzi = 2;
                 MSKint32t asub[nzi];
                 double aval[nzi];
@@ -507,6 +506,7 @@ namespace planner{
                 r = MSK_putarow(task, row_idx, nzi, asub, aval);
                 row_idx ++;
             }
+
             val0 = 1.0 / scale_k;
             val1 = 1.0 / scale_n;
             for(int i = 0; i < 2; i++)
@@ -637,7 +637,7 @@ namespace planner{
         for (int i = 0; i < ctrlPt_num; i++)
             d_var(i) = x_var[i];
 
-        _PolyCoeff = Eigen::MatrixXd::Zero(segment_num, 3 * (_traj_order + 1));
+        _PolyCoeff = Eigen::MatrixXd::Zero(segment_num, 2 * (_traj_order + 1));
 
         int var_shift = 0;
         for (int i = 0; i < segment_num; i++)
