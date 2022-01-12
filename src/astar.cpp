@@ -207,7 +207,7 @@ namespace planner{
             model_size = robot_model_ -> setModel(CUBE_);
         else if (symbol == CYLINDER_)
             model_size = robot_model_ -> setModel(CYLINDER_);
-        std::cout << "test!!!!!!" << std::endl;
+        // std::cout << "test!!!!!!" << std::endl;
         for (int i = pos_idx(0) - model_size(0); i <= pos_idx(0) + model_size(0); ++i)
             for (int j = pos_idx(1) - model_size(1); j <= pos_idx(1) + model_size(1); ++j)
                 for (int k = pos_idx(2) - model_size(2); k <= pos_idx(2); ++k){

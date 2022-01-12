@@ -1,10 +1,11 @@
 #ifndef BEZIER_TRAJECTORY_H
 #define BEZIER_TRAJECTORY_H
 
+#include <eigen3/Eigen/Dense>
 #include <ros/console.h>
 #include <nav_msgs/Path.h>
-#include <Eigen/Dense>
 #include <vector>
+
 #include "bazier_traj/planner_parameter.h"
 #include "mosek.h"
 #include "region_segmentation.h"

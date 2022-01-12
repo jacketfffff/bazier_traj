@@ -48,7 +48,7 @@ namespace planner{
         CjList_.clear();
 
         for (int order = 0; order <= order_max_; order++){
-            Eigen::MatrixXd M;
+            Eigen::MatrixXd M(order + 1, order + 1);
             Eigen::MatrixXd Q, Q_l, Q_u;
             Eigen::MatrixXd MQM;
 
@@ -157,7 +157,9 @@ namespace planner{
                           1,   -10,     45,  -120,    210,  -252,  210,  -120,    45,  -10,   1;
                     break;
                 }
-        }
+                default:
+                    break;
+            }
 
             int poly_num_1D = order + 1;
             M.resize(poly_num_1D, poly_num_1D);
@@ -244,9 +246,10 @@ namespace planner{
         const double _margin,
         double &_obj,
         Eigen::MatrixXd &_PolyCoeff){
-
         double initScale = _region.front()->t_;
         double lstScale = _region.back()->t_;
+        std::cout << "zhwm@bit" << std::endl;
+
         int segment_num = _region.size();
         //n阶贝塞尔曲线，要n+1个控制点，三维上有3*（n+1）坐标，二维上有2（n+1）个
         int n_ploy = _traj_order + 1;
@@ -384,6 +387,7 @@ namespace planner{
                     asub[0] = k * s1CtrlPt_num + i * s1d1CtrlPt_num + p;
                     asub[1] = k * s1d1CtrlPt_num + i * s1d1CtrlPt_num + p + 1;
                     asub[2] = k * s1d1CtrlPt_num + i * s1d1CtrlPt_num + p + 2;
+            std::cout << "asub == " << asub << std::endl;
 
                     r = MSK_putarow(task, row_idx, nzi, asub, aval);
                     row_idx++;
@@ -397,254 +401,255 @@ namespace planner{
             double aval[nzi];
             aval[0] = 1.0 * initScale;
             asub[0] = i * s1d1CtrlPt_num;
+            std::cout << "asub = " << asub << std::endl;
             r = MSK_putarow(task, row_idx, nzi, asub, aval);
             row_idx++;
         }
-        for (int i = 0; i < 2; i++){
-            int nzi = 2;
-            MSKint32t asub[nzi];
-            double aval[nzi];
-            aval[0] = -1.0 * _traj_order;
-            aval[1] = 1.0 * _traj_order;
-            asub[0] = i * s1d1CtrlPt_num;
-            asub[1] = i * s1d1CtrlPt_num + 1;
-            r = MSK_putarow(task, row_idx, nzi, asub, aval);
-            row_idx++;
-        }
-        for (int i = 0; i < 2; i++){
-            int nzi = 3;
-            MSKint32t asub[nzi];
-            double aval[nzi];
-            aval[0] =   1.0 * _traj_order * (_traj_order - 1) / initScale;
-            aval[1] = - 2.0 * _traj_order * (_traj_order - 1) / initScale;
-            aval[2] =   1.0 * _traj_order * (_traj_order - 1) / initScale;
-            asub[0] = i * s1d1CtrlPt_num;
-            asub[1] = i * s1d1CtrlPt_num + 1;
-            asub[2] = i * s1d1CtrlPt_num + 2;
-            r = MSK_putarow(task, row_idx, nzi, asub, aval);
-            row_idx ++;
-        }
-        //终点
-        for(int i = 0; i < 2; i++)
-        {  // loop for x, y, z
-            int nzi = 1;
-            MSKint32t asub[nzi];
-            double aval[nzi];
-            asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
-            aval[0] = 1.0 * lstScale;
-            r = MSK_putarow(task, row_idx, nzi, asub, aval);
-            row_idx ++;
-        }
-        for(int i = 0; i < 2; i++)
-        {
-            int nzi = 2;
-            MSKint32t asub[nzi];
-            double aval[nzi];
-            asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 1;
-            asub[1] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
-            aval[0] = - 1.0;
-            aval[1] =   1.0;
-            r = MSK_putarow(task, row_idx, nzi, asub, aval);
-            row_idx ++;
-        }
-        for(int i = 0; i < 2; i++)
-        {
-            int nzi = 3;
-            MSKint32t asub[nzi];
-            double aval[nzi];
-            asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 2;
-            asub[1] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 1;
-            asub[2] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
-            aval[0] =   1.0 / lstScale;
-            aval[1] = - 2.0 / lstScale;
-            aval[2] =   1.0 / lstScale;
-            r = MSK_putarow(task, row_idx, nzi, asub, aval);
-            row_idx ++;
-        }
+    //     for (int i = 0; i < 2; i++){
+    //         int nzi = 2;
+    //         MSKint32t asub[nzi];
+    //         double aval[nzi];
+    //         aval[0] = -1.0 * _traj_order;
+    //         aval[1] = 1.0 * _traj_order;
+    //         asub[0] = i * s1d1CtrlPt_num;
+    //         asub[1] = i * s1d1CtrlPt_num + 1;
+    //         r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //         row_idx++;
+    //     }
+    //     for (int i = 0; i < 2; i++){
+    //         int nzi = 3;
+    //         MSKint32t asub[nzi];
+    //         double aval[nzi];
+    //         aval[0] =   1.0 * _traj_order * (_traj_order - 1) / initScale;
+    //         aval[1] = - 2.0 * _traj_order * (_traj_order - 1) / initScale;
+    //         aval[2] =   1.0 * _traj_order * (_traj_order - 1) / initScale;
+    //         asub[0] = i * s1d1CtrlPt_num;
+    //         asub[1] = i * s1d1CtrlPt_num + 1;
+    //         asub[2] = i * s1d1CtrlPt_num + 2;
+    //         r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //         row_idx ++;
+    //     }
+    //     //终点
+    //     for(int i = 0; i < 2; i++)
+    //     {  // loop for x, y, z
+    //         int nzi = 1;
+    //         MSKint32t asub[nzi];
+    //         double aval[nzi];
+    //         asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
+    //         aval[0] = 1.0 * lstScale;
+    //         r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //         row_idx ++;
+    //     }
+    //     for(int i = 0; i < 2; i++)
+    //     {
+    //         int nzi = 2;
+    //         MSKint32t asub[nzi];
+    //         double aval[nzi];
+    //         asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 1;
+    //         asub[1] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
+    //         aval[0] = - 1.0;
+    //         aval[1] =   1.0;
+    //         r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //         row_idx ++;
+    //     }
+    //     for(int i = 0; i < 2; i++)
+    //     {
+    //         int nzi = 3;
+    //         MSKint32t asub[nzi];
+    //         double aval[nzi];
+    //         asub[0] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 2;
+    //         asub[1] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num - 1;
+    //         asub[2] = ctrlPt_num - 1 - (2 - i) * s1d1CtrlPt_num;
+    //         aval[0] =   1.0 / lstScale;
+    //         aval[1] = - 2.0 / lstScale;
+    //         aval[2] =   1.0 / lstScale;
+    //         r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //         row_idx ++;
+    //     }
 
-        //joint points
-        int sub_shift = 0;
-        double val0, val1;
-        for (int k = 0; k < segment_num - 1; k++){
-            double scale_k = _region[k]->t_;
-            double scale_n = _region[k + 1]->t_;
+    //     //joint points
+    //     int sub_shift = 0;
+    //     double val0, val1;
+    //     for (int k = 0; k < segment_num - 1; k++){
+    //         double scale_k = _region[k]->t_;
+    //         double scale_n = _region[k + 1]->t_;
 
-            val0 = scale_k;
-            val1 = scale_n;
-            for (int i = 0; i < 2; i++){
-                int nzi = 2;
-                MSKint32t asub[nzi];
-                double aval[nzi];
-                // This segment's last control point
-                aval[0] = 1.0 * val0;
-                asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
-                // Next segment's first control point
-                aval[1] = -1.0 * val1;
-                asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num;
-                r = MSK_putarow(task, row_idx, nzi, asub, aval);
-                row_idx++;
-            }
+    //         val0 = scale_k;
+    //         val1 = scale_n;
+    //         for (int i = 0; i < 2; i++){
+    //             int nzi = 2;
+    //             MSKint32t asub[nzi];
+    //             double aval[nzi];
+    //             // This segment's last control point
+    //             aval[0] = 1.0 * val0;
+    //             asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
+    //             // Next segment's first control point
+    //             aval[1] = -1.0 * val1;
+    //             asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num;
+    //             r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //             row_idx++;
+    //         }
 
-            for(int i = 0; i < 2; i++)
-            {
-                int nzi = 4;
-                MSKint32t asub[nzi];
-                double aval[nzi];
+    //         for(int i = 0; i < 2; i++)
+    //         {
+    //             int nzi = 4;
+    //             MSKint32t asub[nzi];
+    //             double aval[nzi];
 
-                // This segment's last velocity control point
-                aval[0] = -1.0;
-                aval[1] =  1.0;
-                asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 2;
-                asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
-                // Next segment's first velocity control point
-                aval[2] =  1.0;
-                aval[3] = -1.0;
+    //             // This segment's last velocity control point
+    //             aval[0] = -1.0;
+    //             aval[1] =  1.0;
+    //             asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 2;
+    //             asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
+    //             // Next segment's first velocity control point
+    //             aval[2] =  1.0;
+    //             aval[3] = -1.0;
 
-                asub[2] = sub_shift + (i + 1) * s1CtrlPt_num;
-                asub[3] = sub_shift + (i + 1) * s1CtrlPt_num;
+    //             asub[2] = sub_shift + (i + 1) * s1CtrlPt_num;
+    //             asub[3] = sub_shift + (i + 1) * s1CtrlPt_num;
 
-                r = MSK_putarow(task, row_idx, nzi, asub, aval);
-                row_idx ++;
-            }
+    //             r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //             row_idx ++;
+    //         }
 
-            val0 = 1.0 / scale_k;
-            val1 = 1.0 / scale_n;
-            for(int i = 0; i < 2; i++)
-            {
-                int nzi = 6;
-                MSKint32t asub[nzi];
-                double aval[nzi];
+    //         val0 = 1.0 / scale_k;
+    //         val1 = 1.0 / scale_n;
+    //         for(int i = 0; i < 2; i++)
+    //         {
+    //             int nzi = 6;
+    //             MSKint32t asub[nzi];
+    //             double aval[nzi];
 
-                // This segment's last velocity control point
-                aval[0] =  1.0  * val0;
-                aval[1] = -2.0  * val0;
-                aval[2] =  1.0  * val0;
-                asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 3;
-                asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num - 2;
-                asub[2] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
-                // Next segment's first velocity control point
-                aval[3] =  -1.0  * val1;
-                aval[4] =   2.0  * val1;
-                aval[5] =  -1.0  * val1;
-                asub[3] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num;
-                asub[4] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num + 1;
-                asub[5] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num + 2;
+    //             // This segment's last velocity control point
+    //             aval[0] =  1.0  * val0;
+    //             aval[1] = -2.0  * val0;
+    //             aval[2] =  1.0  * val0;
+    //             asub[0] = sub_shift + (i + 1) * s1d1CtrlPt_num - 3;
+    //             asub[1] = sub_shift + (i + 1) * s1d1CtrlPt_num - 2;
+    //             asub[2] = sub_shift + (i + 1) * s1d1CtrlPt_num - 1;
+    //             // Next segment's first velocity control point
+    //             aval[3] =  -1.0  * val1;
+    //             aval[4] =   2.0  * val1;
+    //             aval[5] =  -1.0  * val1;
+    //             asub[3] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num;
+    //             asub[4] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num + 1;
+    //             asub[5] = sub_shift + s1CtrlPt_num + i * s1d1CtrlPt_num + 2;
 
-                r = MSK_putarow(task, row_idx, nzi, asub, aval);
-                row_idx ++;
-            }
-            sub_shift += s1CtrlPt_num;
-        }
+    //             r = MSK_putarow(task, row_idx, nzi, asub, aval);
+    //             row_idx ++;
+    //         }
+    //         sub_shift += s1CtrlPt_num;
+    //     }
 
-        // Start stacking the objective")
-        int min_order_l = std::floor(_minimize_order);
-        int min_order_u = std::ceil (_minimize_order);
-        int NUMQNZ = 0;
-        for (int i = 0; i < segment_num; i++){
-            int NUMQ_blk = _traj_order + 1;
-            NUMQNZ += 2 * NUMQ_blk * (NUMQ_blk + 1) / 2;//tag: ???
-        }
-        MSKint32t qsubi[NUMQNZ], qsubj[NUMQNZ];
-        double qval[NUMQNZ];
+    //     // Start stacking the objective")
+    //     int min_order_l = std::floor(_minimize_order);
+    //     int min_order_u = std::ceil (_minimize_order);
+    //     int NUMQNZ = 0;
+    //     for (int i = 0; i < segment_num; i++){
+    //         int NUMQ_blk = _traj_order + 1;
+    //         NUMQNZ += 2 * NUMQ_blk * (NUMQ_blk + 1) / 2;//tag: ???
+    //     }
+    //     MSKint32t qsubi[NUMQNZ], qsubj[NUMQNZ];
+    //     double qval[NUMQNZ];
 
-        sub_shift = 0;
-        int idx = 0;
-        for (int k = 0; k < segment_num; k++){
-            double scale_k = _region[k]->t_;
-            for (int p = 0; p < 2; p++){
-                for (int i = 0; i < s1d1CtrlPt_num; i++){
-                    for (int j = 0; j < s1d1CtrlPt_num; j++){
-                        if(i >= j){
-                            qsubi[idx] = sub_shift + p * s1d1CtrlPt_num + i;
-                            qsubj[idx] = sub_shift + p * s1d1CtrlPt_num + j;
+    //     sub_shift = 0;
+    //     int idx = 0;
+    //     for (int k = 0; k < segment_num; k++){
+    //         double scale_k = _region[k]->t_;
+    //         for (int p = 0; p < 2; p++){
+    //             for (int i = 0; i < s1d1CtrlPt_num; i++){
+    //                 for (int j = 0; j < s1d1CtrlPt_num; j++){
+    //                     if(i >= j){
+    //                         qsubi[idx] = sub_shift + p * s1d1CtrlPt_num + i;
+    //                         qsubj[idx] = sub_shift + p * s1d1CtrlPt_num + j;
 
-                            if(min_order_l == min_order_u)
-                                qval[idx] = _MQM(i, j) / pow(scale_k, 2 * min_order_u - 3);
-                            else
-                                qval[idx] = _MQM(i, j) * ((_minimize_order - min_order_l) / std::pow(scale_k, 2 * min_order_u - 3) +
-                                                          (min_order_u - _minimize_order) / std::pow(scale_k, 2 * min_order_l - 3));
-                            idx++;
-                        }
-                    }
-                }
-            }
-            sub_shift += s1CtrlPt_num;
-        }
+    //                         if(min_order_l == min_order_u)
+    //                             qval[idx] = _MQM(i, j) / pow(scale_k, 2 * min_order_u - 3);
+    //                         else
+    //                             qval[idx] = _MQM(i, j) * ((_minimize_order - min_order_l) / std::pow(scale_k, 2 * min_order_u - 3) +
+    //                                                       (min_order_u - _minimize_order) / std::pow(scale_k, 2 * min_order_l - 3));
+    //                         idx++;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         sub_shift += s1CtrlPt_num;
+    //     }
 
-        if(r == MSK_RES_OK)
-            r = MSK_putqobj(task, NUMQNZ, qsubi, qsubj, qval);
-        if(r == MSK_RES_OK)
-            r = MSK_putobjsense(task, MSK_OBJECTIVE_SENSE_MINIMIZE);
+    //     if(r == MSK_RES_OK)
+    //         r = MSK_putqobj(task, NUMQNZ, qsubi, qsubj, qval);
+    //     if(r == MSK_RES_OK)
+    //         r = MSK_putobjsense(task, MSK_OBJECTIVE_SENSE_MINIMIZE);
 
-        bool solve_ok = false;
-        if(r == MSK_RES_OK){
-            MSKrescodee trmcode;
-            r = MSK_optimizetrm(task, &trmcode);
-            MSK_solutionsummary(task, MSK_STREAM_LOG);
-            if(r == MSK_RES_OK){
-                MSKsolstae solsta;
-                MSK_getsolsta(task, MSK_SOL_ITR, &solsta);
+    //     bool solve_ok = false;
+    //     if(r == MSK_RES_OK){
+    //         MSKrescodee trmcode;
+    //         r = MSK_optimizetrm(task, &trmcode);
+    //         MSK_solutionsummary(task, MSK_STREAM_LOG);
+    //         if(r == MSK_RES_OK){
+    //             MSKsolstae solsta;
+    //             MSK_getsolsta(task, MSK_SOL_ITR, &solsta);
 
-                switch(solsta){
-                    case MSK_SOL_STA_OPTIMAL:
+    //             switch(solsta){
+    //                 case MSK_SOL_STA_OPTIMAL:
 
-                    case MSK_SOL_STA_NEAR_OPTIMAL:
-                        r = MSK_getxx(task, MSK_SOL_ITR, x_var);
-                        r = MSK_getprimalobj(task, MSK_SOL_ITR, &primalobj);
-                        _obj = primalobj;
-                        solve_ok = true;
-                        break;
+    //                 case MSK_SOL_STA_NEAR_OPTIMAL:
+    //                     r = MSK_getxx(task, MSK_SOL_ITR, x_var);
+    //                     r = MSK_getprimalobj(task, MSK_SOL_ITR, &primalobj);
+    //                     _obj = primalobj;
+    //                     solve_ok = true;
+    //                     break;
 
-                    case MSK_SOL_STA_DUAL_INFEAS_CER:
+    //                 case MSK_SOL_STA_DUAL_INFEAS_CER:
 
-                    case MSK_SOL_STA_PRIM_INFEAS_CER:
+    //                 case MSK_SOL_STA_PRIM_INFEAS_CER:
 
-                    case MSK_SOL_STA_NEAR_DUAL_INFEAS_CER:
+    //                 case MSK_SOL_STA_NEAR_DUAL_INFEAS_CER:
 
-                    case MSK_SOL_STA_NEAR_PRIM_INFEAS_CER:
-                        printf("Primal or dual infeasibility certificate found.\n");
-                        break;
+    //                 case MSK_SOL_STA_NEAR_PRIM_INFEAS_CER:
+    //                     printf("Primal or dual infeasibility certificate found.\n");
+    //                     break;
 
-                    case MSK_SOL_STA_UNKNOWN:
-                        printf("The status of the solution could not be determined.\n");
-                        //solve_ok = true; // debug
-                    break;
+    //                 case MSK_SOL_STA_UNKNOWN:
+    //                     printf("The status of the solution could not be determined.\n");
+    //                     //solve_ok = true; // debug
+    //                 break;
 
-                    default:
-                        printf("Other solution status.");
-                        break;
-                }
-            }
-            else
-                std::cout << "Error while optimizing" << std::endl;
-        }
-        if(r != MSK_RES_OK){
-            char symname[MSK_MAX_STR_LEN];
-            char desc[MSK_MAX_STR_LEN];
+    //                 default:
+    //                     printf("Other solution status.");
+    //                     break;
+    //             }
+    //         }
+    //         else
+    //             std::cout << "Error while optimizing" << std::endl;
+    //     }
+    //     if(r != MSK_RES_OK){
+    //         char symname[MSK_MAX_STR_LEN];
+    //         char desc[MSK_MAX_STR_LEN];
 
-            std::cout << "An error occurred while optimizing" << std::endl;
-            MSK_getcodedesc(r, symname, desc);
-            printf("Error %s - '%s'\n",symname,desc);
-        }
-        MSK_deletetask(&task);
-        MSK_deleteenv(&env);
+    //         std::cout << "An error occurred while optimizing" << std::endl;
+    //         MSK_getcodedesc(r, symname, desc);
+    //         printf("Error %s - '%s'\n",symname,desc);
+    //     }
+    //     MSK_deletetask(&task);
+    //     MSK_deleteenv(&env);
 
-        if(!solve_ok){
-            std::cout << "solver failed" << std::endl;
-            return -1;
-        }
-        Eigen::VectorXd d_var(ctrlPt_num);
-        for (int i = 0; i < ctrlPt_num; i++)
-            d_var(i) = x_var[i];
+    //     if(!solve_ok){
+    //         std::cout << "solver failed" << std::endl;
+    //         return -1;
+    //     }
+    //     Eigen::VectorXd d_var(ctrlPt_num);
+    //     for (int i = 0; i < ctrlPt_num; i++)
+    //         d_var(i) = x_var[i];
 
-        _PolyCoeff = Eigen::MatrixXd::Zero(segment_num, 2 * (_traj_order + 1));
+    //     _PolyCoeff = Eigen::MatrixXd::Zero(segment_num, 2 * (_traj_order + 1));
 
-        int var_shift = 0;
-        for (int i = 0; i < segment_num; i++)
-            for (int j = 0; j < 2 * n_ploy; j++){
-                _PolyCoeff(i, j) = d_var(j + var_shift);
-                var_shift += 2 * n_ploy;
-            }
+    //     int var_shift = 0;
+    //     for (int i = 0; i < segment_num; i++)
+    //         for (int j = 0; j < 2 * n_ploy; j++){
+    //             _PolyCoeff(i, j) = d_var(j + var_shift);
+    //             var_shift += 2 * n_ploy;
+    //         }
 
         return 1;
     }
