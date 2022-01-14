@@ -22,3 +22,6 @@ int planner::PlannerParameter::_step_length = 2;
 int planner::PlannerParameter::_max_x_id = planner::PlannerParameter::_x_local_size * planner::PlannerParameter::_inv_resolution;
 int planner::PlannerParameter::_max_y_id = planner::PlannerParameter::_y_local_size * planner::PlannerParameter::_inv_resolution;
 int planner::PlannerParameter::_max_z_id = planner::PlannerParameter::_z_local_size * planner::PlannerParameter::_inv_resolution;
+double planner::PlannerParameter::_start_x = 0.0;
+double planner::PlannerParameter::_start_y = 0.0;
+double planner::PlannerParameter::_start_z = 0.0;

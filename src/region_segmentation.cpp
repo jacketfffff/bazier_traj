@@ -290,6 +290,63 @@ namespace planner{
         // return segmentation_res;
     }
 
+    void RegionSegmentation::timeAllocation(std::vector<cubePtr> &region_res){
+        std::vector<Eigen::Vector3d> points;
+        Eigen::Vector3d start_pt;
+        Eigen::Vector3d end_pt;
+        end_pt << PlannerParameter::_start_x, PlannerParameter::_start_y, PlannerParameter::_start_z;
+        start_pt << PlannerParameter::_start_x, PlannerParameter::_start_y, PlannerParameter::_start_z;
+        points.push_back(start_pt);
+        for (int i = 1; i < region_res.size(); i++)
+            points.push_back(region_res[i]->center_);
+        points.push_back(end_pt);
+
+        double _Vel = PlannerParameter::_MAX_VEL * 0.6;
+        double _Acc = PlannerParameter::_MAX_ACC * 0.6;
+
+        for (int k = 0; k < points.size()-1; k++){
+            double dtxyz;
+            Eigen::Vector3d p0 = points[k];
+            Eigen::Vector3d p1 = points[k + 1];
+            Eigen::Vector3d d = p1 - p0;
+            Eigen::Vector3d v0(0.0, 0.0, 0.0);
+
+            if(k == 0)
+                v0 = start_vel_;
+
+            double D = d.norm();
+            double V0 = v0.dot(d / D);
+            double aV0 = fabs(V0);
+
+            double acct = (_Vel - V0) / _Acc * ((_Vel > V0) ? 1 : -1);
+            double accd = V0 * acct + (_Acc * acct * acct / 2) * ((_Vel > V0) ? 1 : -1);
+            double dcct = _Vel / _Acc;
+            double dccd = _Acc * dcct * dcct / 2;
+
+            if(D < aV0 * aV0 / (2 * _Acc)){
+                double t1 = (V0 < 0) ? 2.0 * aV0 / _Acc : 0.0;
+                double t2 = aV0 / _Acc;
+                dtxyz = t1 + t2;
+            }
+            else if (D < accd + dccd){
+                double t1 = (V0 < 0)?2.0 * aV0 / _Acc:0.0;
+                double t2 = (-aV0 + sqrt(aV0 * aV0 + _Acc * D - aV0 * aV0 / 2)) / _Acc;
+                double t3 = (aV0 + _Acc * t2) / _Acc;
+                dtxyz     = t1 + t2 + t3;
+            }
+            else{
+                double t1 = acct;
+                double t2 = (D - accd - dccd) / _Vel;
+                double t3 = dcct;
+                dtxyz     = t1 + t2 + t3;
+          }
+          region_res[k] -> t_ = dtxyz;
+        }
+    }
+
+    void RegionSegmentation::init(){
+
+    }
     void RegionSegmentation::segmentationVis(const std::vector<cubePtr>& _segmentation_res){
         int id = 0;
         segmentation_voxel_.markers.clear();

@@ -41,6 +41,7 @@ namespace planner{
             cubePtr cubeGeneration(const Eigen::Vector3d _node_pos);
             std::pair<cubePtr, bool> cubeInflate(cubePtr _cube, cubePtr _lstcube);
             cubePtr setVertex(const Eigen::MatrixXd vertex_, const double resolution_);
+            Eigen::Vector3d start_vel_;// todo: init the start_vel in function init
 
             sdf_tools::CollisionMapGrid *collision_map_;
             std::vector<cubePtr> region_res_;
@@ -56,8 +57,8 @@ namespace planner{
             RegionSegmentation(sdf_tools::CollisionMapGrid *_collision_map);
             ~RegionSegmentation();
             void init();
-
-            std::vector<cubePtr> getSegRes() {return region_res_;}
+            void timeAllocation(std::vector<cubePtr> &region_res);
+            std::vector<cubePtr> getSegRes() { return region_res_; }
             void advertiseInit(ros::NodeHandle &_nh){
                 segmentation_res_vis_ = _nh.advertise<visualization_msgs::MarkerArray>("segmentation_res", 10);
             }

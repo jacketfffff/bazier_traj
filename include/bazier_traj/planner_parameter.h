@@ -26,6 +26,8 @@ class PlannerParameter{
         static int _max_y_id;
         static int _max_x_id;
         static int _max_z_id;
+        static double _start_x, _start_y, _start_z;
+        static double _end_x, _end_y, _end_z;
 };
 };
 
